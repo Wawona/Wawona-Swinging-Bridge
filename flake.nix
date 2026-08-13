@@ -12,7 +12,10 @@
 
   outputs = { self, nixpkgs, rust-overlay, wwn-toolchain, ... }:
     let
-      darwinSystems = [ "x86_64-darwin" "aarch64-darwin" ];
+      # Nixpkgs 26.11 throws on x86_64-darwin eval; flakehub-push always runs
+      # `nix flake show --all-systems`. Intel Mac still builds via Wawona's
+      # registry merge with its own pkgs.
+      darwinSystems = [ "aarch64-darwin" ];
       linuxSystems = [ "x86_64-linux" "aarch64-linux" ];
       allSystems = darwinSystems ++ linuxSystems;
       forAll = nixpkgs.lib.genAttrs allSystems;
