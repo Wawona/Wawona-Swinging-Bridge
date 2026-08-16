@@ -1,70 +1,47 @@
-# wwn-anowaW
+# Wawona Swinging Bridge
 
-[![CI](https://github.com/Wawona/wwn-anowaW/actions/workflows/ci.yml/badge.svg)](https://github.com/Wawona/wwn-anowaW/actions/workflows/ci.yml)
+[![CI](https://github.com/Wawona/Wawona-Swinging-Bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/Wawona/Wawona-Swinging-Bridge/actions/workflows/ci.yml)
 
-**anowaW** ("Wawona" reversed) is Wawona's *app bridge*: it renders a running
-native **macOS (Cocoa/AppKit)** or **Android** application as a first-class
-Wayland client *inside* Wawona's nested-Weston desktop. A phosh / GNOME / KDE /
-niri session running under Wawona shows the host OS's apps as ordinary desktop
-windows.
+**Wawona Swinging Bridge** (formerly **anowaW**, “Wawona” reversed) is Wawona’s
+**application bridge**: it turns running **macOS (Cocoa/AppKit)** and **Android**
+apps into first-class **Wayland clients**, so they can tile inside a nested
+compositor in Wawona **or** be forwarded with **waypipe-rs** (`wwn-waypipe`) onto
+a **Linux** Wayland compositor with real resize, placement, and HID.
 
-This repo contains **only the bridge** — the code that turns per-app host
-surfaces into Wayland surfaces and routes input back to the source app. The
-compositor, launcher, settings, and machine model live in the
-[`Wawona`](https://github.com/Wawona/Wawona) integration repo.
+Future: **UIKit iOS** apps (Mode B / jailbreak only — not in the App Store IPA).
+
+This repo is **only the bridge**. Compositor, Machines UI, and packaging live in
+[`Wawona`](https://github.com/Wawona/Wawona).
 
 ## What it is (and is not)
 
-anowaW is an **on-device capture-to-Wayland bridge**, not a scrcpy-style remote
-display protocol:
-
-- **macOS**: ScreenCaptureKit captures a single `SCWindow` into an `IOSurface`,
-  which is imported as a `wl_buffer` (zero-copy dmabuf where possible, SHM
-  fallback). Input decoded from the Wayland seat is injected back with
-  `CGEvent` / Accessibility.
-- **Android**: an app is launched onto an app-owned `VirtualDisplay`; its
-  `Surface` (`AHardwareBuffer`) is imported as a `wl_buffer`. Input is injected
-  through `InputManager`.
-
-Conceptually this is the shape Waydroid uses (its HWC acts as a Wayland client
-that maps Android surfaces to Wayland windows), but anowaW reuses the *host*
-OS's own compositor (WindowServer / SurfaceFlinger) and bridges only per-app
-surfaces, so there is no second Android userland to ship.
-
-anowaW connects **as a client of the nested Weston** (`--backend=wayland`), not
-Wawona's root Smithay compositor, so bridged apps appear inside the Linux
-desktop rather than floating on the root surface.
+- **Is:** Cocoa / Android / (future UIKit) → Wayland (+ waypipe to Linux).
+- **Is not:** Desktop Replacement, LockScreen Replacement, or MediaProjection-as-desktop.
+- Mode A (store/Play, stream-like) and Mode B (privileged) are **planned**; neither
+  ships yet. iOS is **Mode B only**.
 
 ## Layout
 
 ```
 flake.nix                              registryFragment + lib.mkAnowaw
-dependencies/libs/anowaw/
-  anowaw-src.nix                       pins the in-repo Rust core crate
-  macos.nix ios.nix android.nix ...    per-platform static-lib recipes
-  Cargo.lock                           pinned lockfile (reproducible builds)
-core/                                  Rust core (Wayland client, C FFI)
-  Cargo.toml src/*.rs
-platform/macos/                        ScreenCaptureKit capture + CGEvent inject
-platform/android/                      VirtualDisplay capture + InputManager inject
-.github/                              CI + patch-anchor verifier
+dependencies/libs/anowaw/              per-platform recipes (legacy key `anowaw`)
+core/                                  Rust core (Wayland client, C FFI `anowaw_*`)
+platform/macos/                        ScreenCaptureKit + CGEvent
+platform/android/                      VirtualDisplay + InputManager
 ```
+
+Legacy C ABI / Nix recipe names (`anowaw`, `libanowaw`, `anowaw_*`) remain until
+a follow-up rename; the product name is **Wawona Swinging Bridge**.
 
 ## Use
 
 ```nix
-inputs.wwn-anowaW.url = "github:Wawona/wwn-anowaW";
+inputs.wwn-swinging-bridge.url = "github:Wawona/Wawona-Swinging-Bridge";
 
-registry = wwn-toolchain.lib.baseRegistry // wwn-anowaW.registryFragment;
+registry = wwn-toolchain.lib.baseRegistry // wwn-swinging-bridge.registryFragment;
 
-# In-process static lib for the Wawona app to link against:
-anowaw = wwn-anowaW.lib.mkAnowaw { inherit pkgs; platform = "macos"; };
+anowaw = wwn-swinging-bridge.lib.mkAnowaw { inherit pkgs; platform = "macos"; };
 ```
-
-The static lib exports a C ABI (`anowaw_start`, `anowaw_bridge_app`,
-`anowaw_push_frame`, `anowaw_poll_input`, `anowaw_stop`) called the same way
-Wawona already calls `waypipe_main` from ObjC (`WWNWaypipeRunner.m`) and JNI
-(`android_jni.c`).
 
 ## Standalone build
 
@@ -73,15 +50,7 @@ nix build .#anowaw-macos
 nix build .#anowaw-ios
 ```
 
-## Scope
+## Docs
 
-- **v1: weston nested compositor only.** The bridge attaches to a nested Weston
-  Wayland socket. Other nesting hosts (sway/niri/KDE) are out of scope for now.
-- The desktop machine anowaW attaches to must be **local-only** and a **nested
-  Wayland compositor** (never a plain Weston demo client, VM, container, or
-  SSH/waypipe machine). Wawona enforces this filter.
-
-## License
-
-MIT for the Wawona Nix packaging, bridge core, and platform shims (see
-`LICENSE`).
+- Product: [`Wawona/docs/swinging-bridge.md`](https://github.com/Wawona/Wawona/blob/development/docs/swinging-bridge.md)
+- Public: https://wawona.io/docs/swinging-bridge/

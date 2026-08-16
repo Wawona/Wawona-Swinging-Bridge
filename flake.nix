@@ -1,5 +1,5 @@
 {
-  description = "wwn-anowaW: Wawona's app bridge — renders native macOS (Cocoa/AppKit) and Android apps as Wayland clients inside Wawona's nested-Weston desktop. Ships an in-process static lib (libanowaw.a / .so) exporting a C ABI, cross-compiled for Apple platforms and Android.";
+  description = "Wawona Swinging Bridge (formerly anowaW): Cocoa/Android/(UIKit Mode B) apps as Wayland clients, locally or over waypipe-rs to Linux. Ships libanowaw (legacy ABI name) for Apple + Android. Not Desktop/LockScreen.";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
