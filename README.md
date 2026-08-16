@@ -1,5 +1,7 @@
 # wwn-anowaW
 
+[![CI](https://github.com/Wawona/wwn-anowaW/actions/workflows/ci.yml/badge.svg)](https://github.com/Wawona/wwn-anowaW/actions/workflows/ci.yml)
+
 **anowaW** ("Wawona" reversed) is Wawona's *app bridge*: it renders a running
 native **macOS (Cocoa/AppKit)** or **Android** application as a first-class
 Wayland client *inside* Wawona's nested-Weston desktop. A phosh / GNOME / KDE /
