@@ -24,6 +24,7 @@ pkgs.stdenvNoCC.mkDerivation {
     mkdir -p $out/source
     cp -r core $out/source/core
     cp -r platform $out/source/platform
+    cp -r apple $out/source/apple 2>/dev/null || true
     cp -r include $out/source/include 2>/dev/null || true
   '';
 

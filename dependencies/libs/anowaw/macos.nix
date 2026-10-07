@@ -59,12 +59,12 @@ pkgs.rustPlatform.buildRustPackage {
   # Compile the ScreenCaptureKit + CGEvent shim and bundle it next to the lib so
   # the Wawona app links both. The shim drives the Rust core through the C ABI.
   postBuild = ''
-    SHIM=${anowawSrc}/source/platform/macos/AnowawMacBridge.m
+    SHIM=${anowawSrc}/source/apple/Capture.swift
     if [ -f "$SHIM" ]; then
-      clang -c "$SHIM" \
-        -fobjc-arc -fPIC \
+      swiftc -c "$SHIM" \
+        -module-name AnowawCapture \
         -I${anowawSrc}/source/include \
-        -isysroot "$SDKROOT" -mmacosx-version-min=26.0 \
+        -sdk "$SDKROOT" -target ${cargoTarget} -macosx-version-min 26.0 \
         -o anowaw_mac_shim.o || echo "warning: shim compile deferred (SDK frameworks)"
     fi
   '';
